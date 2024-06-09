@@ -1,43 +1,75 @@
 import { NextResponse } from "next/server";
-import db from '@/lib/db';
-import { message } from "antd";
-import { hash } from 'bcrypt'
-import Password from "antd/es/input/Password";
+import prisma from '@/lib/db';
+import argon2 from 'argon2';
 
 export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    console.log('Request body:', body);  // Debugging line
+
+    const { email, username, password } = body;
+
+    // Check for existing user by email or username
+    let existingUser;
     try {
-        const body = await req.json();
-
-        const { email, username, password } = body
-        const existingUserByEmail = await db.user.findUnique({
-            where: { email: email }
-        });
-        if (existingUserByEmail) {
-            return NextResponse.json({ user: null, message: "This email Already in our Database !" })
+      existingUser = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: email },
+            { username: username }
+          ]
         }
-        const existingUserByUsername = await db.user.findUnique({
-            where: { username: username }
-        });
-        if (existingUserByUsername) {
-            return NextResponse.json({ user: null, message: "This username Already in our Database !" })
-        }
-
-        const HashedPassword = await hash(password, 10);
-
-        const creatingUser = await db.user.create({
-            data: {
-                email,
-                username,
-                password: HashedPassword 
-
-            }
-        });
-
-
-
-        return NextResponse.json({ user: creatingUser, message: "user created succusfully" }, { status: 201 })
-
+      });
     } catch (error) {
-
+      if (error instanceof Error) {
+        console.error('Database query error:', error.message, 'Stack:', error.stack);
+        return NextResponse.json({ user: null, message: `Database query error: ${error.message}` });
+      } else {
+        console.error('Unknown database query error:', error);
+        return NextResponse.json({ user: null, message: 'Unknown database query error.' });
+      }
     }
+
+    if (existingUser) {
+      const existingField = existingUser.email === email ? 'email' : 'username';
+      return NextResponse.json({ user: null, message: `This ${existingField} already exists in our database!` });
+    }
+
+    // Hash the password securely
+    const hashedPassword = await argon2.hash(password);
+
+    // Create the user
+    let createdUser;
+    try {
+      createdUser = await prisma.user.create({
+        data: {
+          email,
+          username,
+          password: hashedPassword,
+          updatedAT: new Date(), // Assuming updatedAT should be set to the current timestamp
+
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error creating user:', error.message, 'Stack:', error.stack);
+        return NextResponse.json({ user: null, message: `Failed to create user: ${error.message}` });
+      } else {
+        console.error('Unknown error creating user:', error);
+        return NextResponse.json({ user: null, message: 'Unknown error creating user.' });
+      }
+    }
+
+    // Success response
+    return new NextResponse(JSON.stringify({ user: createdUser, message: 'User created successfully!' }), { status: 201 });
+
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Unexpected error:', error.message, 'Stack:', error.stack);
+      return NextResponse.json({ user: null, message: `An error occurred: ${error.message}` });
+    } else {
+      console.error('Unexpected unknown error:', error);
+      return NextResponse.json({ user: null, message: 'An unknown error occurred.' });
+    }
+  }
 }
