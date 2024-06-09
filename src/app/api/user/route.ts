@@ -9,7 +9,6 @@ export async function POST(req: Request) {
 
     const { email, username, password } = body;
 
-    // Check for existing user by email or username
     let existingUser;
     try {
       existingUser = await prisma.user.findFirst({
@@ -35,7 +34,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ user: null, message: `This ${existingField} already exists in our database!` });
     }
 
-    // Hash the password securely
     const hashedPassword = await argon2.hash(password);
 
     // Create the user
@@ -60,8 +58,9 @@ export async function POST(req: Request) {
       }
     }
 
-    // Success response
-    return new NextResponse(JSON.stringify({ user: createdUser, message: 'User created successfully!' }), { status: 201 });
+    const {password : newuserpassword,...rest} = createdUser
+
+    return new NextResponse(JSON.stringify({ user: rest, message: 'User created successfully!' }), { status: 201 });
 
   } catch (error) {
     if (error instanceof Error) {
