@@ -20,11 +20,16 @@ export default function page() {
     console.log('Failed:', errorInfo);
   };
   return (
-    <div className='flex justify-center items-center h-screen ' >
+    <div className='flex justify-center items-center h-screen'>
       <div className=' p-4 ' style={{ maxWidth: "1020px", minHeight : "400px" }}>
+        <div className='p-4'>
+          <p className='font-bold'>Connexion</p>
+          <p className='text-sm text-sm'>Continuer vers votre compte
+          </p>
+        </div>
         <Form
           name="basic"
-          labelCol={{ span: 9 }}
+          labelCol={{ span: 8 }}
           wrapperCol={{ span: 20 }}
           initialValues={{ remember: true }}
           onFinish={onFinish}
