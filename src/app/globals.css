@@ -24,6 +24,8 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb)); */
+    height: 100%;
+    margin: 0;
 }
 
 @layer utilities {
@@ -32,4 +34,19 @@ body {
   }
 
 
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem; 
+}
+
+/* Footer styling */
+.footer {
+  background-color: #f1f1f1;
+  padding: 10px;
+  text-align: center;
 }
