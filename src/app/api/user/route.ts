@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     console.log('Request body:', body);  // Debugging line
 
-    const { email, username, password } = body;
+    const { email, password } = body;
 
     let existingUser;
     try {
@@ -15,7 +15,6 @@ export async function POST(req: Request) {
         where: {
           OR: [
             { email: email },
-            { username: username }
           ]
         }
       });
@@ -30,8 +29,7 @@ export async function POST(req: Request) {
     }
 
     if (existingUser) {
-      const existingField = existingUser.email === email ? 'email' : 'username';
-      return NextResponse.json({ user: null, message: `This ${existingField} already exists in our database!` });
+      return NextResponse.json({ user: null, message: 'This email already exists in our database!' });
     }
 
     const hashedPassword = await argon2.hash(password);
@@ -42,9 +40,7 @@ export async function POST(req: Request) {
       createdUser = await prisma.user.create({
         data: {
           email,
-          username,
           password: hashedPassword,
-          updatedAT: new Date(), // Assuming updatedAT should be set to the current timestamp
 
         },
       });
@@ -58,7 +54,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const {password : newuserpassword,...rest} = createdUser
+    const { password: newuserpassword, ...rest } = createdUser
 
     return new NextResponse(JSON.stringify({ user: rest, message: 'User created successfully!' }), { status: 201 });
 

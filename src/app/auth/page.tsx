@@ -8,18 +8,46 @@ export default function page() {
 
 
   type FieldType = {
-    username?: string;
-    password?: string;
-    remember?: string;
+    email?: String;
+    password?: String;
   };
 
-  const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
-    console.log('Success:', values);
-  };
+  const onFinish = async (values: any) => {
+    const { email, password } = values;
+
+    const response = await fetch('/api/user', {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        password
+
+
+      })
+
+
+
+    })
+    if (response.ok) {
+      const data = await response.json();
+      console.log('succuss data has been submited', data)
+    } else {
+      console.log("Failed to submit data")
+    }
+
+
+  }
+
+
+
 
   const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
+
+
   return (
     <div className='app flex justify-center items-center h-screen'>
       <div className='content p-4 ' style={{ maxWidth: "1020px", minHeight: "400px" }}>
@@ -40,9 +68,9 @@ export default function page() {
             requiredMark={false}
           >
             <Form.Item<FieldType>
-              label="Username"
-              name="username"
-              rules={[{ required: true, message: "S'il vous plaît entrez votre nom d'utilisateur!" }]}
+              label="email"
+              name="email"
+              rules={[{ required: true, message: "S'il vous plaît entrez votre email!" }]}
             >
               <Input />
             </Form.Item>
@@ -56,13 +84,12 @@ export default function page() {
             </Form.Item>
 
             <Form.Item className='' wrapperCol={{ offset: 8, span: 16 }}>
-              <Button style={{width : '250px'}} type="primary" htmlType="submit">
+              <Button style={{ width: '250px' }} type="primary" htmlType="submit">
                 Se Connecter
               </Button>
             </Form.Item>
           </Form>
         </div>
-
       </div>
     </div>
   )
