@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from '@/lib/db';
 import argon2 from 'argon2';
+import next from "next";
 
 export async function POST(req: Request) {
   try {
@@ -30,6 +31,9 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return NextResponse.json({ user: null, message: 'This email already exists in our database!' });
+    }
+    else{
+      
     }
 
     const hashedPassword = await argon2.hash(password);

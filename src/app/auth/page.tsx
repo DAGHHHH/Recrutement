@@ -1,16 +1,53 @@
 "use client"
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import type { FormProps } from 'antd';
 import { Button, Checkbox, Form, Input } from 'antd';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import * as yup from 'yup';
+
+
 import { Footer } from '@/components/Footer';
 
-export default function page() {
-
-
+export default function page(props : any) {
+  const [form] = Form.useForm();
+  const [clientReady, setClientReady] = useState<boolean>(false);
   type FieldType = {
     email?: String;
     password?: String;
   };
+  // schema for yup validation
+const schema = yup.object().shape({
+  email: yup.string().email().required(),
+  password: yup.string().required().min(6),
+});
+
+useEffect(() => {
+  if (props.values) {
+    const { email, password } = props.values;
+
+    console.log(email,password)
+
+    // Basic email validation regex
+    const emailValidationRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isEmailValid = emailValidationRegex.test(email);
+    const isPasswordNotEmpty = password && password.trim().length > 0;
+
+    if (isEmailValid && isPasswordNotEmpty) {
+      console.log(isEmailValid)
+      setClientReady(true);
+    } else {
+      setClientReady(false);
+    }
+  } else {
+    console.log('undefined props');
+    setClientReady(false);
+  }
+}, [props.values]);
+
+
+
+
+
 
   const onFinish = async (values: any) => {
     const { email, password } = values;
@@ -49,44 +86,45 @@ export default function page() {
 
 
   return (
-    <div className='app flex justify-center items-center h-screen'>
-      <div className='content p-4 ' style={{ maxWidth: "1020px", minHeight: "400px" }}>
-        <div className="form-container">
+    <div className=' h-screen'>
+      <div className=' p-4 ' style={{ maxWidth: "1020px", minHeight: "400px" }}>
+        <div className="flex flex-col">
           <div className='p-4 text-center'>
             <p className='font-bold'>Connexion</p>
             <p className='text-sm text-sm'>Continuer vers votre compte
             </p>
           </div>
-          <Form className='w-96'
-            name="basic"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 20 }}
-            initialValues={{ remember: true }}
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete="off"
-            requiredMark={false}
-          >
-            <Form.Item<FieldType>
-              label="email"
+          <Form form={form} name="horizontal_login" layout="inline" onFinish={onFinish}>
+            <Form.Item
               name="email"
-              rules={[{ required: true, message: "S'il vous plaît entrez votre email!" }]}
+              rules={[{ required: true, message: 'Please input your email!' }]}
             >
-              <Input />
+              <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="email" />
             </Form.Item>
-
-            <Form.Item<FieldType>
-              label="Password"
+            <Form.Item
               name="password"
-              rules={[{ required: true, message: "S'il vous plait entrez votre mot de passe!" }]}
+              rules={[{ required: true, message: 'Please input your password!' }]}
             >
-              <Input.Password />
+              <Input
+                prefix={<LockOutlined className="site-form-item-icon" />}
+                type="password"
+                placeholder="Password"
+              />
             </Form.Item>
-
-            <Form.Item className='' wrapperCol={{ offset: 8, span: 16 }}>
-              <Button style={{ width: '250px' }} type="primary" htmlType="submit">
-                Se Connecter
-              </Button>
+            <Form.Item shouldUpdate>
+              {() => (
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  disabled={
+                    clientReady ||
+                    !form.isFieldsTouched(true) ||
+                    !!form.getFieldsError().filter(({ errors }) => errors.length).length
+                  }
+                >
+                  Log in
+                </Button>
+              )}
             </Form.Item>
           </Form>
         </div>
