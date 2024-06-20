@@ -44,9 +44,20 @@ body {
   padding: 4rem; 
 }
 
+.content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem; 
+}
+
 /* Footer styling */
 .footer {
   background-color: #f1f1f1;
   padding: 10px;
   text-align: center;
+}
+.h-screen {
+  background-image: url('../images/49_7916a894ebde7d29c2cc.jpg');
 }

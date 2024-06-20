@@ -5,10 +5,12 @@ import { Button, Checkbox, Flex, Form, Input } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import * as yup from 'yup';
 import { Footer } from '@/components/Footer';
-import { useNavigate } from 'react-router-dom';
+import {  useRouter } from 'next/navigation';
+
 
 
 export default function page(props: any) {
+  const router = useRouter();
   const [form] = Form.useForm();
   const [clientReady, setClientReady] = useState<boolean>(false);
   type FieldType = {
@@ -25,7 +27,8 @@ export default function page(props: any) {
       const { email, password } = props.values;
       console.log('Email:', email, 'Password:', password);
 
-      const emailValidationRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emailValidationRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
       const isEmailValid = emailValidationRegex.test(email);
       const isPasswordNotEmpty = password && password.trim().length > 0;
 
@@ -61,6 +64,7 @@ export default function page(props: any) {
     if (response.ok) {
       const data = await response.json();
       console.log('succuss data has been submited', data)
+      router.push('/Home');
     } else {
       console.log("Failed to submit data")
     }
@@ -70,14 +74,14 @@ export default function page(props: any) {
   };
   return (
     <div className=' h-screen'>
-      <div className=' p-4  ' style={{ maxWidth: "1020px", minHeight: "400px",display : 'flex',justifyContent : 'center',alignItems : 'center' }}>
+      <div className=' p-4  ' style={{  minHeight: "400px", display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div className="flex flex-col">
           <div className='p-4 text-center'>
-            <p  className='font-bold'>Connexion</p>
+            <p className='font-bold'>Connexion</p>
             <p className='text-sm text-sm'>Continuer vers votre compte
             </p>
           </div>
-          <Form style={{flexDirection : 'column'}} form={form} name="horizontal_login" layout="inline" onFinish={onFinish}>
+          <Form style={{ flexDirection: 'column', gap : '10px' }} form={form} name="horizontal_login" layout="inline" onFinish={onFinish}>
             <Form.Item
               name="email"
               rules={[{ required: true, message: 'Veuillez entrer votre email!' }]}
@@ -97,6 +101,7 @@ export default function page(props: any) {
             <Form.Item shouldUpdate>
               {() => (
                 <Button
+                style={{width : '100%'}}
                   type="primary"
                   htmlType="submit"
                   disabled={
